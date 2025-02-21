@@ -9,6 +9,9 @@ const app = express();
 const port = process.env.PORT;
 
 // MIDDLEWARES
+app.use(express.json());
+
+// ROTAS
 app.use("/users", userRouter);
 app.use("/posts", postRouter);
 app.use("/comments", commentRouter);

@@ -7,7 +7,7 @@ const commentSchema = new Schema(
 		post: { type: Schema.Types.ObjectId, ref: "Post", required: true },
 		desc: { type: String, required: true },
 	}, 
-	{ 
+	{
 		timestamps: true 
 	}
 );
