@@ -3,5 +3,6 @@ declare namespace NodeJS {
 		PORT: string;
 		NODE_ENV: "development" | "production";
 		MONGO_URL: string;
+		CLERK_WEBHOOK_SECRET: string;
 	}
 }

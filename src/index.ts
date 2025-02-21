@@ -4,9 +4,12 @@ import connectDB from './lib/connectDB';
 import userRouter from "./routes/user.route";
 import postRouter from "./routes/post.route";
 import commentRouter from "./routes/comment.route";
+import webhookRouter from "./routes/webhook.route";
 
 const app = express();
 const port = process.env.PORT;
+
+app.use("/webhooks", webhookRouter); // Antes do middleware json para não conflitar pois este usa bodyParser
 
 // MIDDLEWARES
 app.use(express.json());
