@@ -5,14 +5,32 @@ import userRouter from "./routes/user.route";
 import postRouter from "./routes/post.route";
 import commentRouter from "./routes/comment.route";
 import webhookRouter from "./routes/webhook.route";
+import { clerkMiddleware, requireAuth } from '@clerk/express';
 
 const app = express();
 const port = process.env.PORT;
 
-app.use("/webhooks", webhookRouter); // Antes do middleware json para não conflitar pois este usa bodyParser
-
 // MIDDLEWARES
+app.use(clerkMiddleware());
+app.use("/webhooks", webhookRouter); // Antes do middleware json para não conflitar pois este usa bodyParser
 app.use(express.json());
+
+// app.get("/auth-state", (req: Request | any, res: Response) => {
+// 	const authState = req.auth;
+// 	res.json(authState);
+// });
+
+// app.get("/protect", (req: any, res: any) => {
+// 	const { userId } = req.auth;
+// 	if (!userId)
+// 		return res.status(401).json("Not authenticated");
+
+// 	res.status(200).json("content");
+// });
+
+// app.get("/protect2", requireAuth(), (req: any, res: any) => {
+// 	res.status(200).json("content");
+// });
 
 // ROTAS
 app.use("/users", userRouter);
