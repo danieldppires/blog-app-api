@@ -1,6 +1,7 @@
 import Post from "../models/post.model";
 import User from "../models/user.model";
 import { NextFunction, Request, Response } from "express";
+import ImageKit from "imagekit";
 
 interface AuthenticatedRequest extends Request {
 	auth?: { userId?: string };
@@ -121,3 +122,19 @@ export const deletePost = async (req: AuthenticatedRequest, res: Response, next:
 // 		next(err);
 // 	}
 // };
+
+
+
+// Quando enviar uma requisição da aplicação React, enviarei usando a mesma chave publica e endpoint
+// O método getAuthenticationParameters() vai verificar se o usuário que fez a requisição está autenticado 
+// para então iniciar o processo de upload
+const imagekit = new ImageKit({
+	urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT as string,
+	publicKey: process.env.IMAGEKIT_PUBLIC_KEY as string,
+	privateKey: process.env.IMAGEKIT_PRIVATE_KEY as string,
+});
+
+export const uploadAuth = async (req: Request, res: Response) => {
+	const result = imagekit.getAuthenticationParameters();
+	res.send(result);
+}

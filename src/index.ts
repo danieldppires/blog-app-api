@@ -17,6 +17,15 @@ app.use(clerkMiddleware());
 app.use("/webhooks", webhookRouter); // Antes do middleware json para não conflitar pois este usa bodyParser
 app.use(express.json());
 
+app.use((req: Request, res: Response, next: NextFunction) => {
+	res.header("Access-Control-Allow-Origin", "*");
+	res.header(
+		"Access-Control-Allow-Headers",
+		"Origin, X-Requested-Width, Content-Type, Accept"
+	);
+	next();
+});
+
 // app.get("/auth-state", (req: Request | any, res: Response) => {
 // 	const authState = req.auth;
 // 	res.json(authState);
