@@ -44,7 +44,22 @@ export const createPost = async (req: AuthenticatedRequest, res: Response, next:
 			res.status(404).json({ message: "User not found" }); return;
 		}
 
-		const newPost = new Post({ user:user?._id, ...req.body });
+		// Criando slug dinamicamente
+		let title = req.body.title as string;
+		let baseSlug = title.replace(/ /g, "-").toLowerCase();
+		let slug = baseSlug;
+
+		// Verificando se já existe este slug pois deve ser único
+		let existingPost = await Post.findOne({ slug });
+		let counter = 2;
+
+		while (existingPost) {
+		slug = `${baseSlug}-${counter}`; // Sempre baseado no slug original
+		existingPost = await Post.findOne({ slug });
+		counter++;
+		}
+
+		const newPost = new Post({ user:user?._id, slug, ...req.body });
 		const post = await newPost.save();
 
 		res.status(201).json({

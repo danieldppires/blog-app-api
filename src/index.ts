@@ -6,11 +6,13 @@ import postRouter from "./routes/post.route";
 import commentRouter from "./routes/comment.route";
 import webhookRouter from "./routes/webhook.route";
 import { clerkMiddleware, requireAuth } from '@clerk/express';
+import cors from "cors";
 
 const app = express();
 const port = process.env.PORT;
 
 // MIDDLEWARES
+app.use(cors({ origin: process.env.CLIENT_URL })); // Se precisar de cookies, adicionar 'credentials: true'
 app.use(clerkMiddleware());
 app.use("/webhooks", webhookRouter); // Antes do middleware json para não conflitar pois este usa bodyParser
 app.use(express.json());
