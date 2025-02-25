@@ -7,10 +7,25 @@ interface AuthenticatedRequest extends Request {
 	auth?: { userId?: string };
 }
 
-export const getPosts = async (req: Request, res: Response, next: NextFunction) => {
+interface QueryParams {
+	page?: string;
+	limit?: string;
+}
+
+export const getPosts = async (req: Request<{}, {}, {}, QueryParams>, res: Response, next: NextFunction) => {
 	try {
-		const posts = await Post.find();
-		res.status(200).send(posts);
+		const page = parseInt(req.query.page || "1", 10);
+		const limit = parseInt(req.query.limit || "2", 10);
+
+		const posts = await Post.find()
+			.populate("user", "username")
+			.limit(limit)
+			.skip((page - 1) * limit);
+
+		const totalPosts = await Post.countDocuments();
+		const hasMore = page * limit < totalPosts;
+
+		res.status(200).send({ posts, hasMore });
 	}
 	catch (err) {
 		next(err); // Encaminhando o erro para o middleware de erro
@@ -19,7 +34,7 @@ export const getPosts = async (req: Request, res: Response, next: NextFunction) 
 
 export const getPost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 	try {
-		const post = await Post.findOne({ slug: req.params.slug });
+		const post = await Post.findOne({ slug: req.params.slug }).populate("user", "username img");
 
 		if (!post) {
 			res.status(404).json({ message: "Post not found" });
