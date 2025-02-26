@@ -10,25 +10,82 @@ interface AuthenticatedRequest extends Request {
 interface QueryParams {
 	page?: string;
 	limit?: string;
+	cat?: string;
+	author?: string;
+	search?: string;
+	sort?: string;
+	featured?: string;
 }
 
-export const getPosts = async (req: Request<{}, {}, {}, QueryParams>, res: Response, next: NextFunction) => {
+export const getPosts = async (req: Request<{}, {}, {}, QueryParams>, res: Response, next: NextFunction): Promise<void> => {
 	try {
 		const page = parseInt(req.query.page || "1", 10);
-		const limit = parseInt(req.query.limit || "2", 10);
+		const limit = parseInt(req.query.limit || "10", 10);
 
-		const posts = await Post.find()
+		const query: Record<string, any> = {};
+
+		const { cat, author, search: searchQuery, sort: sortQuery, featured } = req.query;
+
+		if (cat) {
+			query.category = cat;
+		}
+
+		if (searchQuery) {
+			query.title = { $regex: searchQuery, $options: "i" };
+		}
+
+		if (author) {
+			const user = await User.findOne({ username: author }).select("_id");
+			if (!user) {
+				res.status(404).json("No post found");
+				return;
+			}
+
+			query.user = user._id;
+		}
+
+		if (featured) {
+			query.featured = true;
+		}
+
+		let sortObj: Record<string, any> = { createdAt: -1 };
+
+		if (sortQuery) {
+			switch (sortQuery) {
+				case "newest":
+					sortObj = {createdAt: -1};
+					break;
+				case "oldest":
+					sortObj = {createdAt: 1};
+					break;
+				case "popular":
+					sortObj = {visit: -1};
+					break;
+				case "trending":
+					sortObj = {visit: -1};
+					query.createdAt = {
+						$gte: new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000), // 7 dias
+					}
+					break;
+				default:
+					sortObj = { createdAt: -1 };
+					break;
+			}
+		}
+
+		const posts = await Post.find(query)
 			.populate("user", "username")
+			.sort(sortObj)
 			.limit(limit)
 			.skip((page - 1) * limit);
 
-		const totalPosts = await Post.countDocuments();
+		const totalPosts = await Post.countDocuments(query);
 		const hasMore = page * limit < totalPosts;
 
 		res.status(200).send({ posts, hasMore });
 	}
 	catch (err) {
-		next(err); // Encaminhando o erro para o middleware de erro
+		next(err);
 	}
 }
 
