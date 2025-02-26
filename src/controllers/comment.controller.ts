@@ -43,9 +43,10 @@ export const addComment = async (req: AuthenticatedRequest, res: Response, next:
 
 		const savedComment = await newComment.save();
 
-		setTimeout(() => {
-			res.status(201).json(savedComment);
-		}, 3000);
+		// setTimeout(() => {
+		// 	res.status(201).json(savedComment);
+		// }, 3000);
+		res.status(201).json(savedComment);
 	}
 	catch (err) {
 		next(err);
