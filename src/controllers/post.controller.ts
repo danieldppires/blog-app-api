@@ -44,10 +44,6 @@ export const getPosts = async (req: Request<{}, {}, {}, QueryParams>, res: Respo
 			query.user = user._id;
 		}
 
-		if (featured) {
-			query.featured = true;
-		}
-
 		let sortObj: Record<string, any> = { createdAt: -1 };
 
 		if (sortQuery) {
@@ -71,6 +67,10 @@ export const getPosts = async (req: Request<{}, {}, {}, QueryParams>, res: Respo
 					sortObj = { createdAt: -1 };
 					break;
 			}
+		}
+
+		if (featured) {
+			query.isFeatured = true;
 		}
 
 		const posts = await Post.find(query)
