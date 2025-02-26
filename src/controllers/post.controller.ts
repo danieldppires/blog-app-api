@@ -123,6 +123,41 @@ export const deletePost = async (req: AuthenticatedRequest, res: Response, next:
 	}
 };
 
+export const featurePost = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+	try {
+		const postId = req.body.postId;
+
+		const clerkUserId = req.auth?.userId;
+		if (!clerkUserId) {
+			res.status(401).json({ message: "Not authenticated" }); return;
+		}
+
+		const role = req.auth?.sessionClaims?.metadata?.role || "user"; // role = "admin" ou "user"
+		if (role !== "admin") {
+			res.status(403).json({ message: "You cannot feature posts" });
+			return;
+		}
+
+		const post = await Post.findById(postId);
+		if (!post) {
+			res.status(404).json("Post not found");
+			return;
+		}
+
+		const isFeatured = post.isFeatured;
+
+		const updatedPost = await Post.findByIdAndUpdate(postId, 
+			{ isFeatured: !isFeatured },
+			{ new: true }
+		);
+
+		res.status(200).json(updatedPost);
+	} 
+	catch (err) {
+		next(err);
+	}
+};
+
 // export const updatePost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 // 	try {
 // 		const post = await Post.findByIdAndUpdate(req.params.id, req.body, {
