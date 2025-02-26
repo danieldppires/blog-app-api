@@ -25,7 +25,7 @@ export const clerkWebHook = async (req: Request, res: Response): Promise<void> =
 	}
 
 	// Logar os dados do evento para entender a estrutura que o Clerk envia
-	console.log(evt.data);
+	// console.log(evt.data);
 
 	// Criar usuário
 	if (evt.type === "user.created") {

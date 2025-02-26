@@ -5,6 +5,7 @@ import userRouter from "./routes/user.route";
 import postRouter from "./routes/post.route";
 import commentRouter from "./routes/comment.route";
 import webhookRouter from "./routes/webhook.route";
+import authRouter from "./routes/auth.route";
 import { clerkMiddleware, requireAuth } from '@clerk/express';
 import cors from "cors";
 
@@ -47,6 +48,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use("/users", userRouter);
 app.use("/posts", postRouter);
 app.use("/comments", commentRouter);
+app.use("/auth", authRouter);
 
 // ERROR HANDLING
 app.use((error: Error & { status?: number }, req: Request, res: Response, next: NextFunction) => {

@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import ImageKit from "imagekit";
 
 interface AuthenticatedRequest extends Request {
-	auth?: { userId?: string };
+	auth?: { userId?: string, sessionClaims: any };
 }
 
 interface QueryParams {
@@ -93,6 +93,13 @@ export const deletePost = async (req: AuthenticatedRequest, res: Response, next:
 		const clerkUserId = req.auth?.userId;
 		if (!clerkUserId) {
 			res.status(401).json({ message: "Not authenticated" }); return;
+		}
+
+		const role = req.auth?.sessionClaims?.metadata?.role || "user"; // role = "admin" ou "user"
+		if (role === "admin") {
+			await Post.findByIdAndDelete(req.params.id);
+			res.status(200).json({ message: "Post has been deleted" });
+			return;
 		}
 
 		const user = await User.findOne({ clerkUserId });

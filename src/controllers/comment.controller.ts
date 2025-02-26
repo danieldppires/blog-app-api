@@ -3,7 +3,7 @@ import Comment from "../models/comment.model";
 import User from "../models/user.model";
 
 interface AuthenticatedRequest extends Request {
-	auth?: { userId?: string };
+	auth?: { userId?: string, sessionClaims?: any, };
 }
 
 export const getPostComments = async (req: Request, res: Response, next: NextFunction) => {
@@ -61,6 +61,13 @@ export const deleteComment = async (req: AuthenticatedRequest, res: Response, ne
 			res.status(401).json("Not authenticated") 
 			return;
 		};
+
+		const role = req.auth?.sessionClaims?.metadata?.role || "user"; // role = "admin" ou "user"		
+		if (role === "admin") {
+			await Comment.findByIdAndDelete(req.params.id);
+			res.status(200).json({ message: "Comment has been deleted" });
+			return;
+		}
 
 		const user = await User.findOne({ clerkUserId });
 		if (!user) {
